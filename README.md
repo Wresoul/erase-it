@@ -35,8 +35,8 @@ data/          # датасеты для обучения (gitignored)
 
 ## Roadmap
 
-- [ ] Data pipeline для инпейнтинга (irregular masks + датасет сцен)
-- [ ] Baseline модель инпейнтинга (encoder-decoder, L1 loss)
+- [x] Data pipeline для инпейнтинга (irregular masks + датасет сцен)
+- [x] Baseline модель инпейнтинга (encoder-decoder, L1 loss)
 - [ ] Adversarial-обучение (PatchGAN, GAN loss)
 - [ ] Интеграция SAM для выбора объекта по клику
 - [ ] Backend API (FastAPI)
