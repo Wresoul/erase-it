@@ -1,1 +1,11 @@
-"""Pydantic-схемы запросов/ответов backend API. Реализация на шаге 5."""
+"""Pydantic-схемы ответов backend API."""
+
+from pydantic import BaseModel
+
+
+class HealthResponse(BaseModel):
+    status: str
+
+
+class ErrorResponse(BaseModel):
+    detail: str

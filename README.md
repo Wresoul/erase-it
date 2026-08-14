@@ -39,7 +39,7 @@ data/          # датасеты для обучения (gitignored)
 - [x] Baseline модель инпейнтинга (encoder-decoder, L1 loss)
 - [x] Adversarial-обучение (PatchGAN, GAN loss)
 - [x] Интеграция SAM для выбора объекта по клику
-- [ ] Backend API (FastAPI)
+- [x] Backend API (FastAPI)
 - [ ] Web-фронтенд
 - [ ] Полировка и финальное тестирование
 
@@ -64,9 +64,14 @@ curl -L -o ml/checkpoints/sam_vit_b.pth \
 python -m app.backend.services.segmentation_demo --image photo.jpg --x 200 --y 150
 ```
 
-## Запуск (появится по мере готовности backend/frontend)
+## Запуск backend
 
 ```bash
 pip install -r requirements.txt
 uvicorn app.backend.main:app --reload
 ```
+
+Эндпоинты: `GET /health`, `POST /segment` (файл + `x`/`y` → PNG-маска), `POST /inpaint`
+(файл + маска → результат). Без `ml/checkpoints/generator.pth` (появится после реального
+обучения на Kaggle) инпейнтинг работает на необученных весах — пайплайн технически
+рабочий, но результат пока не осмысленный. Веб-интерфейс — следующий шаг.
