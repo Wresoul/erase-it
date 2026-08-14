@@ -38,7 +38,7 @@ data/          # датасеты для обучения (gitignored)
 - [x] Data pipeline для инпейнтинга (irregular masks + датасет сцен)
 - [x] Baseline модель инпейнтинга (encoder-decoder, L1 loss)
 - [x] Adversarial-обучение (PatchGAN, GAN loss)
-- [ ] Интеграция SAM для выбора объекта по клику
+- [x] Интеграция SAM для выбора объекта по клику
 - [ ] Backend API (FastAPI)
 - [ ] Web-фронтенд
 - [ ] Полировка и финальное тестирование
@@ -47,6 +47,22 @@ data/          # датасеты для обучения (gitignored)
 
 Обучение инпейнтинг-модели происходит на [Kaggle Notebooks](https://www.kaggle.com/) (бесплатный
 GPU) на подвыборке датасета Places365-small. Ноутбук для запуска: `ml/notebooks/kaggle_train.ipynb`.
+
+## Локализация объекта (SAM)
+
+Для выбора объекта по клику нужен чекпоинт SAM (модель не обучается — используется готовая):
+
+```bash
+mkdir -p ml/checkpoints
+curl -L -o ml/checkpoints/sam_vit_b.pth \
+  https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth
+```
+
+Проверить, что клик по фото действительно превращается в маску:
+
+```bash
+python -m app.backend.services.segmentation_demo --image photo.jpg --x 200 --y 150
+```
 
 ## Запуск (появится по мере готовности backend/frontend)
 
