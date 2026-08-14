@@ -1,8 +1,9 @@
 import io
 
 import numpy as np
+import pytest
 from fastapi.testclient import TestClient
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from app.backend.main import app
 
@@ -107,3 +108,50 @@ def test_inpaint_returns_result_png_same_size():
 
     result = Image.open(io.BytesIO(response.content))
     assert result.size == (size, size)
+
+
+def _make_scenario_image_bytes(width: int, height: int, shape: str | None, box: tuple | None) -> bytes:
+    image = Image.new("RGB", (width, height), (70, 130, 180))
+    if shape is not None:
+        draw = ImageDraw.Draw(image)
+        getattr(draw, shape)(box, fill=(230, 126, 34))
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
+    return buffer.getvalue()
+
+
+# Без настоящих фото пользователя проверяем устойчивость на разнообразных синтетических
+# сценариях: маленький квадрат, широкий/узкий формат, нечётные размеры, объект у самого
+# края и клик по однородному фону без выраженного объекта.
+SHAPE_SCENARIOS = [
+    pytest.param(64, 64, "ellipse", (16, 16, 48, 48), 32, 32, id="small-square"),
+    pytest.param(400, 200, "rectangle", (250, 50, 350, 150), 300, 100, id="wide-landscape"),
+    pytest.param(150, 300, "ellipse", (30, 100, 120, 220), 75, 160, id="tall-portrait"),
+    pytest.param(257, 199, "ellipse", (10, 10, 60, 60), 35, 35, id="odd-dims-object-near-corner"),
+    pytest.param(200, 200, None, None, 100, 100, id="click-on-plain-background"),
+]
+
+
+@pytest.mark.parametrize("width,height,shape,box,click_x,click_y", SHAPE_SCENARIOS)
+def test_full_pipeline_handles_varied_images(width, height, shape, box, click_x, click_y):
+    """End-to-end: /segment -> /inpaint на разных по форме/размеру изображениях."""
+    image_bytes = _make_scenario_image_bytes(width, height, shape, box)
+
+    segment_response = client.post(
+        "/segment",
+        files={"file": ("photo.png", image_bytes, "image/png")},
+        data={"x": click_x, "y": click_y},
+    )
+    assert segment_response.status_code == 200
+    mask_bytes = segment_response.content
+    assert Image.open(io.BytesIO(mask_bytes)).size == (width, height)
+
+    inpaint_response = client.post(
+        "/inpaint",
+        files={
+            "file": ("photo.png", image_bytes, "image/png"),
+            "mask": ("mask.png", mask_bytes, "image/png"),
+        },
+    )
+    assert inpaint_response.status_code == 200
+    assert Image.open(io.BytesIO(inpaint_response.content)).size == (width, height)
