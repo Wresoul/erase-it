@@ -1,6 +1,27 @@
-<!-- Веб-интерфейс: загрузка фото, клик по объекту, результат. Реализация на шаге 6. -->
 <!doctype html>
 <html lang="ru">
-<head><meta charset="utf-8"><title>erase-it</title></head>
-<body></body>
+<head>
+  <meta charset="utf-8">
+  <title>erase-it</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>erase-it</h1>
+  <p>Загрузи фото, кликни по объекту, который нужно убрать, и нажми «Стереть».</p>
+
+  <input type="file" id="file-input" accept="image/*">
+  <canvas id="canvas"></canvas>
+  <br>
+  <button id="erase-btn" disabled>Стереть</button>
+  <p id="status"></p>
+
+  <div id="result-block">
+    <h2>Результат</h2>
+    <img id="result" alt="Результат" hidden>
+    <br>
+    <a id="download-link" download="result.png" hidden>Скачать результат</a>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
 </html>

@@ -23,6 +23,21 @@ def test_health_endpoint():
     assert response.json() == {"status": "ok"}
 
 
+def test_index_serves_frontend_html():
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    assert "erase-it" in response.text
+
+
+def test_static_app_js_is_served():
+    response = client.get("/static/app.js")
+
+    assert response.status_code == 200
+    assert "fetch" in response.text
+
+
 def test_segment_rejects_invalid_image():
     response = client.post(
         "/segment",

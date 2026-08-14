@@ -1,0 +1,37 @@
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 0 16px;
+  color: #222;
+}
+
+canvas {
+  display: block;
+  margin: 16px 0;
+  border: 1px solid #ccc;
+  cursor: crosshair;
+  max-width: 100%;
+}
+
+button {
+  padding: 8px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+#status {
+  color: #555;
+  min-height: 1.2em;
+}
+
+#result {
+  max-width: 100%;
+  border: 1px solid #ccc;
+  margin-top: 12px;
+}
