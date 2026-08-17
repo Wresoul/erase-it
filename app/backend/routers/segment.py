@@ -9,7 +9,7 @@ from fastapi.responses import Response
 from PIL import Image
 
 from app.backend.services.segmentation_service import SegmentationService
-from app.backend.validation import open_validated_image, read_upload_bounded
+from app.backend.validation import open_validated_image, read_upload_bounded, verify_same_origin
 
 router = APIRouter()
 
@@ -19,7 +19,7 @@ def get_segmentation_service() -> SegmentationService:
     return SegmentationService()
 
 
-@router.post("/segment")
+@router.post("/segment", dependencies=[Depends(verify_same_origin)])
 async def segment(
     file: UploadFile = File(...),
     x: int = Form(...),

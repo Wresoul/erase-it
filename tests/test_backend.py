@@ -64,6 +64,41 @@ def test_segment_rejects_truncated_image():
     assert response.status_code == 400
 
 
+def test_segment_rejects_foreign_origin():
+    response = client.post(
+        "/segment",
+        files={"file": ("photo.png", _make_test_image_bytes(100), "image/png")},
+        data={"x": 10, "y": 10},
+        headers={"Origin": "https://evil.example.com"},
+    )
+
+    assert response.status_code == 403
+
+
+def test_segment_allows_matching_origin():
+    response = client.post(
+        "/segment",
+        files={"file": ("photo.png", _make_test_image_bytes(100), "image/png")},
+        data={"x": 10, "y": 10},
+        headers={"Origin": str(client.base_url)},
+    )
+
+    assert response.status_code == 200
+
+
+def test_inpaint_rejects_foreign_origin():
+    response = client.post(
+        "/inpaint",
+        files={
+            "file": ("photo.png", _make_test_image_bytes(100), "image/png"),
+            "mask": ("mask.png", _make_test_image_bytes(100), "image/png"),
+        },
+        headers={"Origin": "https://evil.example.com"},
+    )
+
+    assert response.status_code == 403
+
+
 def test_segment_rejects_oversized_upload():
     oversized = b"x" * (MAX_UPLOAD_SIZE_BYTES + 1)
 

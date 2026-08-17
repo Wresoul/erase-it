@@ -9,7 +9,7 @@ from fastapi.responses import Response
 from PIL import Image
 
 from app.backend.services.inpainting_service import InpaintingService
-from app.backend.validation import open_validated_image, read_upload_bounded
+from app.backend.validation import open_validated_image, read_upload_bounded, verify_same_origin
 
 router = APIRouter()
 
@@ -19,7 +19,7 @@ def get_inpainting_service() -> InpaintingService:
     return InpaintingService()
 
 
-@router.post("/inpaint")
+@router.post("/inpaint", dependencies=[Depends(verify_same_origin)])
 async def inpaint(
     file: UploadFile = File(...),
     mask: UploadFile = File(...),
