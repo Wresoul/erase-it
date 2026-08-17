@@ -49,6 +49,20 @@ def test_segment_rejects_invalid_image():
     assert response.status_code == 400
 
 
+def test_segment_rejects_truncated_image():
+    # PIL распознаёт PNG-заголовок и не кидает UnidentifiedImageError, но падает
+    # позже с OSError при попытке дочитать данные — раньше это давало голый 500.
+    truncated_png = _make_test_image_bytes(100)[:20]
+
+    response = client.post(
+        "/segment",
+        files={"file": ("broken.png", truncated_png, "image/png")},
+        data={"x": 10, "y": 10},
+    )
+
+    assert response.status_code == 400
+
+
 def test_segment_rejects_out_of_bounds_point():
     response = client.post(
         "/segment",
@@ -72,6 +86,20 @@ def test_segment_returns_mask_png():
     mask = np.array(Image.open(io.BytesIO(response.content)))
     assert mask.shape == (200, 200)
     assert set(np.unique(mask)).issubset({0, 255})
+
+
+def test_inpaint_rejects_truncated_image():
+    truncated_png = _make_test_image_bytes(100)[:20]
+
+    response = client.post(
+        "/inpaint",
+        files={
+            "file": ("broken.png", truncated_png, "image/png"),
+            "mask": ("mask.png", _make_test_image_bytes(100), "image/png"),
+        },
+    )
+
+    assert response.status_code == 400
 
 
 def test_inpaint_rejects_mismatched_mask_size():
