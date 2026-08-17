@@ -9,6 +9,7 @@ from fastapi.responses import Response
 from PIL import Image
 
 from app.backend.services.inpainting_service import InpaintingService
+from app.backend.validation import open_validated_image, read_upload_bounded
 
 router = APIRouter()
 
@@ -24,11 +25,10 @@ async def inpaint(
     mask: UploadFile = File(...),
     service: InpaintingService = Depends(get_inpainting_service),
 ) -> Response:
-    try:
-        image = np.array(Image.open(io.BytesIO(await file.read())).convert("RGB"))
-        mask_image = np.array(Image.open(io.BytesIO(await mask.read())).convert("L"))
-    except OSError:
-        raise HTTPException(status_code=400, detail="Не удалось прочитать изображение или маску")
+    image_data = await read_upload_bounded(file)
+    mask_data = await read_upload_bounded(mask)
+    image = np.array(open_validated_image(image_data, mode="RGB"))
+    mask_image = np.array(open_validated_image(mask_data, mode="L"))
 
     if mask_image.shape != image.shape[:2]:
         raise HTTPException(status_code=400, detail="Размер маски не совпадает с размером изображения")

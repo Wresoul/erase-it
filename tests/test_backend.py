@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from PIL import Image, ImageDraw
 
 from app.backend.main import app
+from app.backend.validation import MAX_IMAGE_DIMENSION, MAX_UPLOAD_SIZE_BYTES
 
 client = TestClient(app)
 
@@ -61,6 +62,43 @@ def test_segment_rejects_truncated_image():
     )
 
     assert response.status_code == 400
+
+
+def test_segment_rejects_oversized_upload():
+    oversized = b"x" * (MAX_UPLOAD_SIZE_BYTES + 1)
+
+    response = client.post(
+        "/segment",
+        files={"file": ("huge.png", oversized, "image/png")},
+        data={"x": 10, "y": 10},
+    )
+
+    assert response.status_code == 413
+
+
+def test_segment_rejects_oversized_dimensions():
+    # Узкая, но очень широкая картинка — дёшево создать (мало пикселей),
+    # но превышает лимит по одной стороне, как и было бы у decompression bomb.
+    huge_image = Image.new("RGB", (MAX_IMAGE_DIMENSION + 1, 10), (0, 0, 0))
+    buffer = io.BytesIO()
+    huge_image.save(buffer, format="PNG")
+
+    response = client.post(
+        "/segment",
+        files={"file": ("huge.png", buffer.getvalue(), "image/png")},
+        data={"x": 10, "y": 5},
+    )
+
+    assert response.status_code == 400
+
+
+def test_no_cors_headers_are_ever_sent():
+    # Same-origin приложение: подтверждаем, что запрос с чужого Origin не получает
+    # Access-Control-Allow-* — если кто-то в будущем случайно добавит permissive
+    # CORSMiddleware, этот тест должен упасть.
+    response = client.get("/health", headers={"Origin": "https://evil.example.com"})
+
+    assert "access-control-allow-origin" not in response.headers
 
 
 def test_segment_rejects_out_of_bounds_point():

@@ -32,7 +32,10 @@ class InpaintingService:
 
         checkpoint_path = Path(checkpoint_path)
         if checkpoint_path.exists():
-            state_dict = torch.load(checkpoint_path, map_location=self.device)
+            # weights_only=True запрещает unpickle произвольных объектов (только тензоры) —
+            # torch.load по умолчанию использует pickle, который может исполнить код,
+            # если чекпоинт когда-нибудь станет настраиваемым пользователем.
+            state_dict = torch.load(checkpoint_path, map_location=self.device, weights_only=True)
             self.model.load_state_dict(state_dict)
         self.model.eval()
 

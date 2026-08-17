@@ -9,6 +9,7 @@ from fastapi.responses import Response
 from PIL import Image
 
 from app.backend.services.segmentation_service import SegmentationService
+from app.backend.validation import open_validated_image, read_upload_bounded
 
 router = APIRouter()
 
@@ -25,10 +26,8 @@ async def segment(
     y: int = Form(...),
     service: SegmentationService = Depends(get_segmentation_service),
 ) -> Response:
-    try:
-        image = np.array(Image.open(io.BytesIO(await file.read())).convert("RGB"))
-    except OSError:
-        raise HTTPException(status_code=400, detail="Не удалось прочитать изображение")
+    data = await read_upload_bounded(file)
+    image = np.array(open_validated_image(data, mode="RGB"))
 
     height, width = image.shape[:2]
     if not (0 <= x < width and 0 <= y < height):

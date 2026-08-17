@@ -11,6 +11,12 @@ from app.backend.schemas import HealthResponse
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
+# Сознательно НЕ добавляем CORSMiddleware: фронтенд отдаётся тем же самым FastAPI-
+# приложением (см. index() ниже), поэтому все запросы всегда same-origin и никакого
+# кросс-доменного доступа не требуется. Самая строгая защита — не открывать его вообще,
+# а не открывать и сразу же ограничивать. Если в будущем фронтенд переедет на отдельный
+# домен — добавляй CORSMiddleware с явным списком origins (allow_origins=[...]),
+# НИКОГДА не используй allow_origins=["*"] вместе с allow_credentials=True.
 app = FastAPI(title="erase-it")
 app.include_router(segment.router)
 app.include_router(inpaint.router)
