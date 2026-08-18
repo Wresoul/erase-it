@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 
 from ml.datasets.inpainting_dataset import InpaintingDataset
+from ml.device import resolve_device
 from ml.models.discriminator import PatchDiscriminator
 from ml.models.generator import InpaintingGenerator, composite
 from ml.training.config import TrainingConfig
@@ -18,16 +19,6 @@ from ml.training.losses import (
     reconstruction_loss,
 )
 from ml.training.metrics import psnr, ssim
-
-
-def resolve_device(requested: str) -> torch.device:
-    if requested != "auto":
-        return torch.device(requested)
-    if torch.cuda.is_available():
-        return torch.device("cuda")
-    if torch.backends.mps.is_available():
-        return torch.device("mps")
-    return torch.device("cpu")
 
 
 def _generator_step(

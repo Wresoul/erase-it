@@ -10,6 +10,8 @@ from pathlib import Path
 import numpy as np
 from segment_anything import SamPredictor, sam_model_registry
 
+from ml.device import resolve_device
+
 DEFAULT_CHECKPOINT = Path("ml/checkpoints/sam_vit_b.pth")
 DEFAULT_MODEL_TYPE = "vit_b"
 
@@ -27,10 +29,10 @@ class SegmentationService:
         self,
         checkpoint_path: str | Path = DEFAULT_CHECKPOINT,
         model_type: str = DEFAULT_MODEL_TYPE,
-        device: str = "cpu",
+        device: str = "auto",
     ):
         sam = sam_model_registry[model_type](checkpoint=str(checkpoint_path))
-        sam.to(device)
+        sam.to(resolve_device(device))
         self._predictor = SamPredictor(sam)
 
     def predict_mask(self, image: np.ndarray, point: tuple[int, int]) -> np.ndarray:

@@ -102,7 +102,13 @@ eraseBtn.addEventListener("click", async () => {
     resultImg.hidden = false;
     downloadLink.href = resultUrl;
     downloadLink.hidden = false;
-    setStatus("Готово!");
+
+    const modelTrained = inpaintResponse.headers.get("X-Model-Trained") === "true";
+    setStatus(
+      modelTrained
+        ? "Готово!"
+        : "Готово! (модель ещё не обучена — результат случайный, не осмысленный)"
+    );
   } catch (error) {
     setStatus(`Ошибка: ${error.message}`);
   } finally {

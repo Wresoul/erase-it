@@ -161,6 +161,28 @@ def test_segment_returns_mask_png():
     assert set(np.unique(mask)).issubset({0, 255})
 
 
+def test_inpaint_reports_untrained_model():
+    # В репозитории нет ml/checkpoints/generator.pth, поэтому сервис работает на
+    # случайных весах — заголовок должен честно сообщать об этом клиенту.
+    size = 64
+    image_bytes = _make_test_image_bytes(size)
+    mask = Image.new("L", (size, size), 0)
+    mask.paste(255, (16, 16, 48, 48))
+    mask_buffer = io.BytesIO()
+    mask.save(mask_buffer, format="PNG")
+
+    response = client.post(
+        "/inpaint",
+        files={
+            "file": ("photo.png", image_bytes, "image/png"),
+            "mask": ("mask.png", mask_buffer.getvalue(), "image/png"),
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["x-model-trained"] == "false"
+
+
 def test_inpaint_rejects_truncated_image():
     truncated_png = _make_test_image_bytes(100)[:20]
 

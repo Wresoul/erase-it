@@ -13,6 +13,7 @@ import torch
 from PIL import Image
 from torchvision import transforms
 
+from ml.device import resolve_device
 from ml.models.generator import InpaintingGenerator, composite
 
 DEFAULT_CHECKPOINT = Path("ml/checkpoints/generator.pth")
@@ -24,14 +25,15 @@ class InpaintingService:
         checkpoint_path: str | Path = DEFAULT_CHECKPOINT,
         image_size: int = 256,
         base_channels: int = 32,
-        device: str = "cpu",
+        device: str = "auto",
     ):
         self.image_size = image_size
-        self.device = torch.device(device)
+        self.device = resolve_device(device)
         self.model = InpaintingGenerator(base_channels=base_channels).to(self.device)
 
         checkpoint_path = Path(checkpoint_path)
-        if checkpoint_path.exists():
+        self.is_trained = checkpoint_path.exists()
+        if self.is_trained:
             # weights_only=True запрещает unpickle произвольных объектов (только тензоры) —
             # torch.load по умолчанию использует pickle, который может исполнить код,
             # если чекпоинт когда-нибудь станет настраиваемым пользователем.

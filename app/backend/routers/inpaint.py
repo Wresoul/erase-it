@@ -38,4 +38,5 @@ async def inpaint(
 
     buffer = io.BytesIO()
     result_image.save(buffer, format="PNG")
-    return Response(content=buffer.getvalue(), media_type="image/png")
+    headers = {"X-Model-Trained": "true" if service.is_trained else "false"}
+    return Response(content=buffer.getvalue(), media_type="image/png", headers=headers)
