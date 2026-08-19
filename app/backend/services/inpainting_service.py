@@ -47,19 +47,29 @@ class InpaintingService:
         """image: HWC uint8 RGB. mask: HW uint8/bool, ненулевое = закрасить. Возвращает HWC uint8 RGB."""
         original_size = (image.shape[1], image.shape[0])  # PIL ожидает (width, height)
 
-        image_pil = Image.fromarray(image).resize((self.image_size, self.image_size), Image.BILINEAR)
-        mask_pil = Image.fromarray((mask > 0).astype(np.uint8) * 255).resize(
-            (self.image_size, self.image_size), Image.NEAREST
-        )
+        image_pil = Image.fromarray(image)
+        small_image_pil = image_pil.resize((self.image_size, self.image_size), Image.BILINEAR)
+        mask_pil = Image.fromarray((mask > 0).astype(np.uint8) * 255)
+        small_mask_pil = mask_pil.resize((self.image_size, self.image_size), Image.NEAREST)
 
-        image_tensor = self._to_tensor(image_pil).unsqueeze(0).to(self.device)
-        mask_tensor = self._to_tensor(mask_pil).unsqueeze(0).to(self.device)
-        masked_image = image_tensor * (1 - mask_tensor)
+        small_image_tensor = self._to_tensor(small_image_pil).unsqueeze(0).to(self.device)
+        small_mask_tensor = self._to_tensor(small_mask_pil).unsqueeze(0).to(self.device)
+        masked_image = small_image_tensor * (1 - small_mask_tensor)
 
         with torch.no_grad():
-            pred = self.model(masked_image, mask_tensor)
-            result = composite(image_tensor, pred, mask_tensor)[0]
+            pred = self.model(masked_image, small_mask_tensor)
 
-        result_image = transforms.ToPILImage()(result.clamp(0, 1).cpu())
-        result_image = result_image.resize(original_size, Image.BILINEAR)
+        # Модель работает только на фиксированных 256x256, но композитим на полном
+        # разрешении: апскейлим только предсказание внутри маски, а фон остаётся
+        # исходными пикселями — иначе весь кадр терял бы чёткость от лишнего
+        # downscale+upscale, даже там, где ничего не закрашивалось.
+        pred_image = transforms.ToPILImage()(pred[0].clamp(0, 1).cpu())
+        pred_image = pred_image.resize(original_size, Image.BILINEAR)
+
+        full_image_tensor = self._to_tensor(image_pil).unsqueeze(0)
+        full_mask_tensor = self._to_tensor(mask_pil).unsqueeze(0)
+        full_pred_tensor = self._to_tensor(pred_image).unsqueeze(0)
+
+        result = composite(full_image_tensor, full_pred_tensor, full_mask_tensor)[0]
+        result_image = transforms.ToPILImage()(result.clamp(0, 1))
         return np.array(result_image)

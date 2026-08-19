@@ -2,24 +2,69 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>erase-it</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <h1>erase-it</h1>
-  <p>Загрузи фото, кликни по объекту, который нужно убрать, и нажми «Стереть».</p>
+  <div class="page">
+    <header class="hero">
+      <h1>erase-it</h1>
+      <p>Убирает лишний объект с фотографии в три клика.</p>
+    </header>
 
-  <input type="file" id="file-input" accept="image/*">
-  <canvas id="canvas"></canvas>
-  <br>
-  <button id="erase-btn" disabled>Стереть</button>
-  <p id="status"></p>
+    <div class="card" id="wizard-card">
+      <ol class="steps" id="steps">
+        <li id="step-1" class="active">1. Загрузите фото</li>
+        <li id="step-2">2. Отметьте объект</li>
+        <li id="step-3">3. Результат</li>
+      </ol>
 
-  <div id="result-block">
-    <h2>Результат</h2>
-    <img id="result" alt="Результат" hidden>
-    <br>
-    <a id="download-link" download="result.png" hidden>Скачать результат</a>
+      <div class="panel visible" id="panel-upload">
+        <label class="dropzone" id="dropzone" for="file-input">
+          <span class="dz-icon">📷</span>
+          <span id="dropzone-text">Перетащите фото сюда или нажмите, чтобы выбрать файл</span>
+          <input type="file" id="file-input" accept="image/*">
+        </label>
+      </div>
+
+      <div class="panel" id="panel-select">
+        <p class="file-name" id="file-name-label"></p>
+        <div class="canvas-wrap" id="canvas-wrap">
+          <canvas id="canvas"></canvas>
+          <div class="processing-overlay" id="processing-overlay">
+            <div class="spinner-lg"></div>
+            <p id="processing-text">Ищу объект...</p>
+          </div>
+        </div>
+        <p class="canvas-hint">Кликните по объекту, который нужно убрать</p>
+
+        <div class="actions">
+          <button id="change-photo-btn" class="secondary" type="button">Другое фото</button>
+          <button id="erase-btn" class="primary" disabled>
+            <span class="spinner"></span>
+            <span id="erase-btn-label">Стереть</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-result">
+        <div class="result-skeleton" id="result-skeleton">
+          <div class="spinner-lg"></div>
+          <p>Готовим результат...</p>
+        </div>
+        <img id="result" alt="Результат" hidden>
+        <div class="actions">
+          <a id="download-link" class="download-btn" download="result.png" hidden>Скачать результат</a>
+          <button id="start-over-btn" class="secondary" type="button" hidden>Стереть на другом фото</button>
+        </div>
+      </div>
+
+      <div class="banner" id="banner">
+        <span class="banner-icon" id="banner-icon"></span>
+        <span id="banner-text"></span>
+      </div>
+    </div>
   </div>
 
   <script src="/static/app.js"></script>

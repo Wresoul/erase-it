@@ -127,6 +127,37 @@ def test_segment_rejects_oversized_dimensions():
     assert response.status_code == 400
 
 
+def test_unknown_path_returns_html_error_page_for_browser_navigation():
+    response = client.get("/no-such-page", headers={"accept": "text/html"})
+
+    assert response.status_code == 404
+    assert "text/html" in response.headers["content-type"]
+    assert "404" in response.text
+    assert "Страница не найдена" in response.text
+
+
+def test_unknown_path_returns_json_for_non_browser_requests():
+    response = client.get("/no-such-page")
+
+    assert response.status_code == 404
+    assert "application/json" in response.headers["content-type"]
+    assert "detail" in response.json()
+
+
+def test_segment_error_stays_json_even_with_html_accept_header():
+    # /segment вызывается из app.js через fetch() и должен всегда возвращать JSON,
+    # даже если по случайности будет отправлен Accept: text/html.
+    response = client.post(
+        "/segment",
+        files={"file": ("not-an-image.txt", b"hello world", "text/plain")},
+        data={"x": 10, "y": 10},
+        headers={"accept": "text/html"},
+    )
+
+    assert response.status_code == 400
+    assert "application/json" in response.headers["content-type"]
+
+
 def test_no_cors_headers_are_ever_sent():
     # Same-origin приложение: подтверждаем, что запрос с чужого Origin не получает
     # Access-Control-Allow-* — если кто-то в будущем случайно добавит permissive
