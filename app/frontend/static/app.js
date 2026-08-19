@@ -22,6 +22,7 @@ const resultSkeleton = document.getElementById("result-skeleton");
 const revealWrap = document.getElementById("reveal-wrap");
 const resultImg = document.getElementById("result");
 const downloadLink = document.getElementById("download-link");
+const chainEraseBtn = document.getElementById("chain-erase-btn");
 const startOverBtn = document.getElementById("start-over-btn");
 const stepEls = {
   1: document.getElementById("step-1"),
@@ -33,6 +34,7 @@ let originalFile = null;
 let originalImage = null;
 let clickPoint = null; // координаты в пикселях оригинального изображения
 let scale = 1;
+let lastResultBlob = null; // результат последнего /inpaint — нужен для "Стереть ещё объект"
 
 const MAX_CANVAS_DIM = 700;
 
@@ -122,7 +124,9 @@ function resetToUpload() {
   resultSkeleton.classList.remove("visible");
   resultImg.hidden = true;
   downloadLink.hidden = true;
+  chainEraseBtn.hidden = true;
   startOverBtn.hidden = true;
+  lastResultBlob = null;
   panels.result.classList.remove("just-arrived");
   revealWrap.classList.remove("revealing");
   hideBanner();
@@ -190,6 +194,17 @@ dropzone.addEventListener("drop", (event) => {
 changePhotoBtn.addEventListener("click", resetToUpload);
 startOverBtn.addEventListener("click", resetToUpload);
 
+chainEraseBtn.addEventListener("click", () => {
+  if (!lastResultBlob) return;
+  // Результат становится новым рабочим изображением: пользователь может убрать
+  // ещё один объект, не загружая файл заново. loadFile() ждёт File с именем —
+  // заворачиваем Blob результата в File и дальше ведём как обычную загрузку.
+  const chainFile = new File([lastResultBlob], "erased-result.png", {
+    type: lastResultBlob.type || "image/png",
+  });
+  loadFile(chainFile);
+});
+
 canvas.addEventListener("click", (event) => {
   if (!originalImage) return;
 
@@ -241,12 +256,14 @@ eraseBtn.addEventListener("click", async () => {
     }
     const resultBlob = await inpaintResponse.blob();
     const resultUrl = URL.createObjectURL(resultBlob);
+    lastResultBlob = resultBlob;
 
     // Скелетон остаётся на экране, пока браузер декодирует и отрисовывает
     // картинку — переключаемся на неё только по onload, чтобы шаг "Результат"
     // не открывался пустым на долю секунды.
     resultImg.hidden = true;
     downloadLink.hidden = true;
+    chainEraseBtn.hidden = true;
     startOverBtn.hidden = true;
     resultSkeleton.classList.add("visible");
     goToStep(3);
@@ -256,6 +273,7 @@ eraseBtn.addEventListener("click", async () => {
       resultImg.hidden = false;
       downloadLink.href = resultUrl;
       downloadLink.hidden = false;
+      chainEraseBtn.hidden = false;
       startOverBtn.hidden = false;
       panels.result.classList.remove("just-arrived");
       void panels.result.offsetWidth;

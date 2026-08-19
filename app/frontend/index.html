@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>erase-it</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="stylesheet" href="/static/fonts.css">
   <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -61,11 +62,12 @@
         </div>
         <div class="actions">
           <a id="download-link" class="download-btn" download="result.png" hidden>Скачать результат</a>
+          <button id="chain-erase-btn" class="secondary" type="button" hidden>Стереть ещё объект</button>
           <button id="start-over-btn" class="secondary" type="button" hidden>Стереть на другом фото</button>
         </div>
       </div>
 
-      <div class="banner" id="banner">
+      <div class="banner" id="banner" role="status" aria-live="polite">
         <span class="banner-icon" id="banner-icon"></span>
         <span id="banner-text"></span>
       </div>
