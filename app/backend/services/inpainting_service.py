@@ -14,7 +14,7 @@ from PIL import Image
 from torchvision import transforms
 
 from ml.device import resolve_device
-from ml.models.generator import InpaintingGenerator, composite
+from ml.models.generator import InpaintingGenerator
 
 DEFAULT_CHECKPOINT = Path("ml/checkpoints/generator.pth")
 
@@ -60,16 +60,21 @@ class InpaintingService:
             pred = self.model(masked_image, small_mask_tensor)
 
         # Модель работает только на фиксированных 256x256, но композитим на полном
-        # разрешении: апскейлим только предсказание внутри маски, а фон остаётся
-        # исходными пикселями — иначе весь кадр терял бы чёткость от лишнего
-        # downscale+upscale, даже там, где ничего не закрашивалось.
+        # разрешении: апскейлим только предсказание, а фон остаётся исходными
+        # пикселями — иначе весь кадр терял бы чёткость от лишнего downscale+upscale,
+        # даже там, где ничего не закрашивалось.
         pred_image = transforms.ToPILImage()(pred[0].clamp(0, 1).cpu())
         pred_image = pred_image.resize(original_size, Image.BILINEAR)
 
-        full_image_tensor = self._to_tensor(image_pil).unsqueeze(0)
-        full_mask_tensor = self._to_tensor(mask_pil).unsqueeze(0)
-        full_pred_tensor = self._to_tensor(pred_image).unsqueeze(0)
-
-        result = composite(full_image_tensor, full_pred_tensor, full_mask_tensor)[0]
-        result_image = transforms.ToPILImage()(result.clamp(0, 1))
-        return np.array(result_image)
+        # Для композита используем маску, апскейленную обратно из той же 256x256,
+        # что видела модель, а не исходную полноразрешающую: если тонкий объект
+        # (провод, столб) исчезает при NEAREST-downscale до 256, модель никогда не
+        # получает его как дыру и не удаляет — а полноразмерная маска всё равно
+        # пометила бы этот регион, наложив поверх него размытый неизменённый патч
+        # вместо честного "не смогли распознать, оставили как есть". BILINEAR-
+        # апскейл к тому же даёт мягкий край вместо шва между чётким фоном и
+        # размытым патчем. Композитим через PIL (uint8), а не через float32-тензоры
+        # на полном разрешении — на больших фото это на порядок меньше памяти.
+        reveal_mask = small_mask_pil.resize(original_size, Image.BILINEAR)
+        result_image = Image.composite(pred_image, image_pil, reveal_mask)
+        return np.array(result_image.convert("RGB"))

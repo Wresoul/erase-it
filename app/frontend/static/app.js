@@ -19,6 +19,7 @@ const banner = document.getElementById("banner");
 const bannerIcon = document.getElementById("banner-icon");
 const bannerText = document.getElementById("banner-text");
 const resultSkeleton = document.getElementById("result-skeleton");
+const revealWrap = document.getElementById("reveal-wrap");
 const resultImg = document.getElementById("result");
 const downloadLink = document.getElementById("download-link");
 const startOverBtn = document.getElementById("start-over-btn");
@@ -123,6 +124,7 @@ function resetToUpload() {
   downloadLink.hidden = true;
   startOverBtn.hidden = true;
   panels.result.classList.remove("just-arrived");
+  revealWrap.classList.remove("revealing");
   hideBanner();
   goToStep(1);
 }
@@ -258,6 +260,11 @@ eraseBtn.addEventListener("click", async () => {
       panels.result.classList.remove("just-arrived");
       void panels.result.offsetWidth;
       panels.result.classList.add("just-arrived");
+      // Ключевой момент интерфейса: результат "проявляется" сканирующей линией
+      // слева направо, а не просто всплывает — визуальная метафора "стирания".
+      revealWrap.classList.remove("revealing");
+      void revealWrap.offsetWidth;
+      revealWrap.classList.add("revealing");
     };
     resultImg.src = resultUrl;
 

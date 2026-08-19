@@ -1,45 +1,57 @@
 :root {
-  --bg: #f4f5f7;
-  --surface: #ffffff;
-  --surface-muted: #f0f1f4;
-  --border: #dfe2e8;
-  --text: #1d2129;
-  --text-muted: #5b6270;
-  --accent: #3d63dd;
-  --accent-hover: #3153c4;
-  --accent-contrast: #ffffff;
-  --success: #1a8754;
-  --success-bg: #e8f6ee;
-  --warning: #b5750a;
-  --warning-bg: #fdf1dd;
-  --error: #c53030;
-  --error-bg: #fbeaea;
-  --info: #3d63dd;
-  --info-bg: #eaf0fe;
-  --shadow: 0 1px 2px rgba(20, 24, 32, 0.06), 0 8px 24px rgba(20, 24, 32, 0.06);
-  --radius: 14px;
+  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* Тёмный editor-стиль — основная идентичность продукта, а не переключаемая
+     "по умолчанию светлая" тема. Светлый вариант ниже — та же система, просто
+     на бумажном фоне, а не откат к типовому светлому SaaS. */
+  --bg: #0a0c11;
+  --bg-2: #10131a;
+  --surface: #14171f;
+  --surface-2: #1a1e28;
+  --border: #262b36;
+  --border-strong: #38404f;
+  --text: #eceef2;
+  --text-muted: #8b93a3;
+  --accent: #2dd4c8;
+  --accent-hover: #52e3d9;
+  --accent-contrast: #04231f;
+  --success: #34d399;
+  --success-bg: rgba(52, 211, 153, 0.14);
+  --warning: #fbbf24;
+  --warning-bg: rgba(251, 191, 36, 0.14);
+  --error: #f87171;
+  --error-bg: rgba(248, 113, 113, 0.14);
+  --info: var(--accent);
+  --info-bg: rgba(45, 212, 200, 0.14);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 24px 60px rgba(0, 0, 0, 0.5);
+  --radius: 10px;
+  --radius-sm: 7px;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
-    --bg: #14161c;
-    --surface: #1c1f27;
-    --surface-muted: #22252e;
-    --border: #2d313c;
-    --text: #e8e9ed;
-    --text-muted: #9a9fac;
-    --accent: #6d8dff;
-    --accent-hover: #8aa2ff;
-    --accent-contrast: #0b0d12;
-    --success: #4ade80;
-    --success-bg: #123322;
-    --warning: #f0b429;
-    --warning-bg: #372a0c;
-    --error: #f28b82;
-    --error-bg: #3a1a1a;
-    --info: #6d8dff;
-    --info-bg: #1a2340;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+    --bg: #f2efe6;
+    --bg-2: #ece7d9;
+    --surface: #fffdf9;
+    --surface-2: #ece7d9;
+    --border: #ddd6c4;
+    --border-strong: #c7bea6;
+    --text: #1c1d1f;
+    --text-muted: #66604f;
+    --accent: #0d998c;
+    --accent-hover: #0b7f74;
+    --accent-contrast: #ffffff;
+    --success: #157a56;
+    --success-bg: rgba(21, 122, 86, 0.1);
+    --warning: #92640a;
+    --warning-bg: rgba(146, 100, 10, 0.12);
+    --error: #b3261e;
+    --error-bg: rgba(179, 38, 30, 0.1);
+    --info: var(--accent);
+    --info-bg: rgba(13, 153, 140, 0.1);
+    --shadow: 0 1px 2px rgba(30, 25, 10, 0.06), 0 20px 50px rgba(30, 25, 10, 0.1);
   }
 }
 
@@ -47,33 +59,79 @@
   box-sizing: border-box;
 }
 
+html,
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
   margin: 0;
-  padding: 32px 16px 64px;
+  padding: 40px 16px 72px;
   line-height: 1.5;
+  position: relative;
+}
+
+/* Атмосферная подложка вместо плоского фона: два мягких акцентных ореола +
+   лёгкое зерно поверх, чтобы тёмный фон не выглядел пустым. */
+.atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 45% at 12% -8%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 65%),
+    radial-gradient(50% 40% at 105% 8%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%),
+    var(--bg);
+}
+
+.atmosphere::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 
 .page {
   max-width: 640px;
   margin: 0 auto;
+  position: relative;
 }
 
 header.hero {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 10px;
 }
 
 header.hero h1 {
-  font-size: 1.75rem;
-  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+  background: linear-gradient(135deg, var(--text) 40%, var(--accent) 130%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-header.hero p {
+header.hero .subtitle {
   color: var(--text-muted);
   margin: 0;
+  font-size: 0.98rem;
 }
 
 .card {
@@ -96,17 +154,28 @@ header.hero p {
 .steps li {
   flex: 1;
   text-align: center;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  font-family: var(--font-display);
+  font-weight: 600;
   color: var(--text-muted);
   padding-bottom: 10px;
-  border-bottom: 3px solid var(--border);
+  border-bottom: 2px solid var(--border);
   transition: color 0.2s, border-color 0.2s;
+}
+
+.step-num {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  opacity: 0.55;
+  margin-bottom: 3px;
 }
 
 .steps li.active {
   color: var(--accent);
   border-color: var(--accent);
-  font-weight: 600;
 }
 
 .steps li.done {
@@ -117,7 +186,6 @@ header.hero p {
 .steps li.processing {
   color: var(--accent);
   border-color: var(--accent);
-  font-weight: 600;
   animation: pulse-text 1s ease-in-out infinite;
 }
 
@@ -135,9 +203,9 @@ header.hero p {
   display: flex;
   flex-direction: column;
   align-items: center;
-  border: 2px dashed var(--border);
+  border: 1px dashed var(--border-strong);
   border-radius: var(--radius);
-  padding: 32px 16px;
+  padding: 40px 16px;
   text-align: center;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
@@ -147,7 +215,7 @@ header.hero p {
 .dropzone:hover,
 .dropzone.dragover {
   border-color: var(--accent);
-  background: var(--surface-muted);
+  background: var(--surface-2);
   color: var(--text);
 }
 
@@ -161,9 +229,10 @@ header.hero p {
 }
 
 .dropzone .dz-icon {
-  font-size: 2rem;
+  font-size: 1.8rem;
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  opacity: 0.85;
 }
 
 /* Wizard: только одна панель (шаг) видна на странице за раз. */
@@ -176,14 +245,11 @@ header.hero p {
   animation: fade-in-up 0.3s ease;
 }
 
-.panel.leaving {
-  animation: fade-out-down 0.15s ease forwards;
-}
-
 .file-name {
   text-align: center;
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
   margin: 0 0 12px;
   word-break: break-all;
 }
@@ -201,7 +267,7 @@ canvas {
   max-height: 60vh;
   width: auto;
   height: auto;
-  border-radius: calc(var(--radius) - 4px);
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   cursor: crosshair;
   transition: filter 0.2s;
@@ -215,10 +281,11 @@ canvas {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
   backdrop-filter: blur(2px);
-  border-radius: calc(var(--radius) - 4px);
+  border-radius: var(--radius-sm);
   color: var(--text);
+  font-family: var(--font-display);
   font-weight: 600;
   z-index: 2;
 }
@@ -232,14 +299,14 @@ canvas {
 }
 
 .canvas-wrap.just-loaded {
-  border-radius: calc(var(--radius) - 4px);
+  border-radius: var(--radius-sm);
   animation: flash-highlight 0.8s ease;
 }
 
 .spinner-lg {
   width: 40px;
   height: 40px;
-  border: 4px solid var(--border);
+  border: 3px solid var(--border);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -257,16 +324,20 @@ canvas {
   gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
+  margin-top: 20px;
 }
 
 button.primary {
   background: var(--accent);
   color: var(--accent-contrast);
   border: none;
-  border-radius: 999px;
-  padding: 10px 26px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: var(--radius-sm);
+  padding: 11px 24px;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
   display: inline-flex;
@@ -284,29 +355,37 @@ button.primary:active:not(:disabled) {
 
 button.primary:disabled {
   cursor: not-allowed;
-  opacity: 0.45;
+  opacity: 0.4;
 }
 
 button.secondary {
   background: transparent;
   color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 10px 20px;
-  font-size: 0.95rem;
-  font-weight: 600;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 11px 20px;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
 }
 
-button.secondary:hover {
+button.secondary:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--accent);
 }
 
+button.secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
 .spinner {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   border: 2px solid rgba(255, 255, 255, 0.4);
   border-top-color: currentColor;
   border-radius: 50%;
@@ -329,7 +408,7 @@ button.primary.loading .spinner {
   align-items: flex-start;
   gap: 10px;
   padding: 12px 16px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   font-size: 0.92rem;
   margin-top: 16px;
 }
@@ -362,8 +441,67 @@ button.primary.loading .spinner {
   color: var(--error);
 }
 
+#panel-result {
+  text-align: center;
+}
+
 #panel-result.just-arrived {
   animation: result-flash 1s ease;
+}
+
+/* Момент, ради которого всё затевалось: результат не просто появляется, а
+   "проявляется" слева направо со светящейся линией-сканером — визуальная
+   метафора самого действия "стереть", а не generic fade.
+   display:inline-block — обёртка облегает реальный размер картинки, а не
+   ширину карточки: иначе для портретных/маленьких результатов линия (в
+   координатах контейнера) и wipe (в координатах картинки) шли бы с разной
+   скоростью и расходились. */
+.reveal-wrap {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  margin-bottom: 14px;
+}
+
+.reveal-wrap.revealing img#result {
+  animation: wipe-clip 0.9s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+.reveal-wrap.revealing::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 24px 3px var(--accent);
+  animation: wipe-line 0.9s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  z-index: 1;
+}
+
+@keyframes wipe-clip {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes wipe-line {
+  0% {
+    left: 0;
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
 }
 
 #result {
@@ -372,8 +510,8 @@ button.primary.loading .spinner {
   max-height: 60vh;
   width: auto;
   height: auto;
-  margin: 0 auto 14px;
-  border-radius: calc(var(--radius) - 4px);
+  margin: 0;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
 }
 
@@ -389,17 +527,13 @@ a.download-btn[hidden] {
   justify-content: center;
   gap: 12px;
   min-height: 220px;
-  border-radius: calc(var(--radius) - 4px);
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  background: linear-gradient(
-    100deg,
-    var(--surface-muted) 40%,
-    var(--border) 50%,
-    var(--surface-muted) 60%
-  );
+  background: linear-gradient(100deg, var(--surface-2) 40%, var(--border) 50%, var(--surface-2) 60%);
   background-size: 250% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
   color: var(--text-muted);
+  font-family: var(--font-display);
   font-weight: 600;
   margin-bottom: 14px;
 }
@@ -428,17 +562,6 @@ a.download-btn[hidden] {
   }
 }
 
-@keyframes fade-out-down {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-}
-
 @keyframes flash-highlight {
   0% {
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent);
@@ -458,15 +581,19 @@ a.download-btn[hidden] {
 }
 
 a.download-btn {
-  display: inline-block;
-  background: var(--surface-muted);
+  display: inline-flex;
+  align-items: center;
+  background: var(--surface-2);
   color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 8px 20px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 11px 20px;
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 a.download-btn:hover {
@@ -474,9 +601,11 @@ a.download-btn:hover {
   color: var(--accent);
 }
 
-/* Страница ошибки (404/500/...) переиспользует переменные и .card выше */
+/* Страница ошибки (404/500/...) переиспользует переменные и .card выше.
+   112px = 40px + 72px вертикальный padding body (см. правило body выше) —
+   держи в синхроне при изменении padding, иначе появится лишний скролл. */
 .error-page {
-  min-height: calc(100vh - 96px);
+  min-height: calc(100vh - 112px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -488,15 +617,17 @@ a.download-btn:hover {
 }
 
 .error-code {
-  font-size: 3.5rem;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 3.2rem;
+  font-weight: 500;
   color: var(--accent);
   margin: 0;
   line-height: 1;
 }
 
 .error-title {
-  font-size: 1.3rem;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
   margin: 12px 0 8px;
 }
 
@@ -509,10 +640,14 @@ a.download-btn:hover {
   display: inline-block;
   background: var(--accent);
   color: var(--accent-contrast);
-  border-radius: 999px;
-  padding: 10px 26px;
+  border-radius: var(--radius-sm);
+  padding: 11px 24px;
   text-decoration: none;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .error-home-link:hover {

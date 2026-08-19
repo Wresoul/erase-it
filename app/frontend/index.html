@@ -4,20 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>erase-it</title>
+  <link rel="stylesheet" href="/static/fonts.css">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+  <div class="atmosphere" aria-hidden="true"></div>
   <div class="page">
     <header class="hero">
+      <p class="kicker">Object removal tool</p>
       <h1>erase-it</h1>
-      <p>Убирает лишний объект с фотографии в три клика.</p>
+      <p class="subtitle">Убирает лишний объект с фотографии в три клика.</p>
     </header>
 
     <div class="card" id="wizard-card">
       <ol class="steps" id="steps">
-        <li id="step-1" class="active">1. Загрузите фото</li>
-        <li id="step-2">2. Отметьте объект</li>
-        <li id="step-3">3. Результат</li>
+        <li id="step-1" class="active"><span class="step-num">01</span>Загрузите фото</li>
+        <li id="step-2"><span class="step-num">02</span>Отметьте объект</li>
+        <li id="step-3"><span class="step-num">03</span>Результат</li>
       </ol>
 
       <div class="panel visible" id="panel-upload">
@@ -53,7 +56,9 @@
           <div class="spinner-lg"></div>
           <p>Готовим результат...</p>
         </div>
-        <img id="result" alt="Результат" hidden>
+        <div class="reveal-wrap" id="reveal-wrap">
+          <img id="result" alt="Результат" hidden>
+        </div>
         <div class="actions">
           <a id="download-link" class="download-btn" download="result.png" hidden>Скачать результат</a>
           <button id="start-over-btn" class="secondary" type="button" hidden>Стереть на другом фото</button>

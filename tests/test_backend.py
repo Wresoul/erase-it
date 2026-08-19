@@ -264,6 +264,40 @@ def test_inpaint_returns_result_png_same_size():
     assert result.size == (size, size)
 
 
+def test_inpaint_preserves_background_outside_mask():
+    # Регрессионный тест на баг, при котором composite() выполнялся на
+    # уменьшенном до 256x256 кадре и весь фон терял чёткость при апскейле
+    # обратно — даже там, где маска ничего не закрашивала. Берём фото крупнее
+    # внутреннего размера модели (256), чтобы даунскейл/апскейл был реальным
+    # шагом пайплайна, а не no-op.
+    width, height = 800, 600
+    image = Image.new("RGB", (width, height), (70, 130, 180))
+    image_buffer = io.BytesIO()
+    image.save(image_buffer, format="PNG")
+    image_bytes = image_buffer.getvalue()
+
+    mask = Image.new("L", (width, height), 0)
+    mask.paste(255, (300, 200, 500, 400))
+    mask_buffer = io.BytesIO()
+    mask.save(mask_buffer, format="PNG")
+
+    response = client.post(
+        "/inpaint",
+        files={
+            "file": ("photo.png", image_bytes, "image/png"),
+            "mask": ("mask.png", mask_buffer.getvalue(), "image/png"),
+        },
+    )
+
+    assert response.status_code == 200
+    result = np.array(Image.open(io.BytesIO(response.content)).convert("RGB"))
+    original = np.array(image)
+
+    corners = [(5, 5), (width - 5, 5), (5, height - 5), (width - 5, height - 5)]
+    for x, y in corners:
+        assert tuple(result[y, x]) == tuple(original[y, x])
+
+
 def _make_scenario_image_bytes(width: int, height: int, shape: str | None, box: tuple | None) -> bytes:
     image = Image.new("RGB", (width, height), (70, 130, 180))
     if shape is not None:
